@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inbox Assistant — Wulff Defense Solutions</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .display { font-family: 'Space Grotesk', sans-serif; }
+        .thread-item { transition: background-color .15s ease; }
+        .thread-item:hover { background-color: rgb(39 39 42); }
+        .thread-item.active { background-color: rgb(30 58 138 / .35); border-left-color: #3b82f6; }
+        .spin { animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .fade-in { animation: fade .25s ease; }
+        @keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+    </style>
+</head>
+<body class="bg-zinc-950 text-zinc-200 h-screen flex flex-col overflow-hidden">
+
+    <!-- HEADER -->
+    <header class="bg-black border-b border-zinc-800 flex-shrink-0">
+        <div class="px-5 h-14 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <i class="fas fa-shield-halved text-blue-500"></i>
+                <span class="display font-bold tracking-tight">Inbox Assistant</span>
+                <span class="hidden sm:inline text-xs text-zinc-500">Wulff Defense Solutions</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <span id="userBadge" class="hidden text-sm text-zinc-400"></span>
+                <button id="voiceBtn" onclick="openVoice()" class="hidden text-sm px-3 py-1.5 rounded-md bg-zinc-800 hover:bg-zinc-700">
+                    <i class="fas fa-microphone-lines mr-1"></i> Voice
+                </button>
+                <button id="settingsBtn" onclick="openSettings()" class="text-sm px-3 py-1.5 rounded-md bg-zinc-800 hover:bg-zinc-700">
+                    <i class="fas fa-gear mr-1"></i> Settings
+                </button>
+                <button id="signinBtn" onclick="signIn()" class="text-sm px-4 py-1.5 rounded-md bg-blue-600 hover:bg-blue-500 font-medium">
+                    <i class="fab fa-google mr-1"></i> Connect Gmail
+                </button>
+                <button id="signoutBtn" onclick="signOut()" class="hidden text-sm px-3 py-1.5 rounded-md bg-zinc-800 hover:bg-zinc-700">Sign out</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- SETUP NOTICE -->
+    <div id="setupNotice" class="hidden flex-1 overflow-auto">
+        <div class="max-w-2xl mx-auto py-12 px-6">
+            <h1 class="display text-2xl font-bold mb-2">Welcome</h1>
+            <p class="text-zinc-400 mb-6">This assistant reads your Gmail, learns how you write, and drafts replies that sound like you — all from your browser. Nothing is sent to any server except Google and Anthropic directly. Two one-time setup steps:</p>
+
+            <div class="space-y-5">
+                <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+                    <h2 class="font-semibold mb-2"><span class="text-blue-500">1.</span> Google OAuth Client ID</h2>
+                    <p class="text-sm text-zinc-400 mb-3">Lets the app sign you into Gmail. Create one (free) in the Google Cloud Console:</p>
+                    <ol class="text-sm text-zinc-400 list-decimal ml-5 space-y-1 mb-3">
+                        <li>Open <a class="text-blue-400 underline" href="https://console.cloud.google.com/apis/library/gmail.googleapis.com" target="_blank">Google Cloud Console</a> → enable the <b>Gmail API</b>.</li>
+                        <li>Go to <b>APIs &amp; Services → Credentials → Create Credentials → OAuth client ID</b>.</li>
+                        <li>Application type: <b>Web application</b>.</li>
+                        <li>Under <b>Authorized JavaScript origins</b>, add this page's origin: <code id="originHint" class="bg-black px-1.5 py-0.5 rounded text-blue-300"></code></li>
+                        <li>Copy the <b>Client ID</b> and paste it in Settings.</li>
+                    </ol>
+                </div>
+                <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+                    <h2 class="font-semibold mb-2"><span class="text-blue-500">2.</span> Anthropic API Key</h2>
+                    <p class="text-sm text-zinc-400 mb-3">Powers the "sound like me" reply generation with Claude. Get one at <a class="text-blue-400 underline" href="https://console.anthropic.com/settings/keys" target="_blank">console.anthropic.com</a>, then paste it in Settings.</p>
+                </div>
+            </div>
+
+            <button onclick="openSettings()" class="mt-6 px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 font-medium">
+                <i class="fas fa-gear mr-1"></i> Open Settings
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN APP -->
+    <main id="app" class="hidden flex-1 flex overflow-hidden">
+        <!-- THREAD LIST -->
+        <aside class="w-full md:w-96 border-r border-zinc-800 flex flex-col flex-shrink-0">
+            <div class="p-3 border-b border-zinc-800 flex items-center gap-2">
+                <div class="relative flex-1">
+                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 text-sm"></i>
+                    <input id="searchInput" onkeydown="if(event.key==='Enter')loadThreads()" placeholder="Search inbox…"
+                        class="w-full bg-zinc-900 border border-zinc-800 rounded-md pl-9 pr-3 py-2 text-sm focus:outline-none focus:border-blue-600">
+                </div>
+                <button onclick="loadThreads()" title="Refresh" class="px-3 py-2 rounded-md bg-zinc-800 hover:bg-zinc-700">
+                    <i id="refreshIcon" class="fas fa-rotate-right text-sm"></i>
+                </button>
+            </div>
+            <div id="threadList" class="flex-1 overflow-auto"></div>
+        </aside>
+
+        <!-- READING / COMPOSE PANE -->
+        <section class="flex-1 flex flex-col overflow-hidden">
+            <div id="emptyState" class="flex-1 flex items-center justify-center text-zinc-600">
+                <div class="text-center">
+                    <i class="fas fa-envelope-open-text text-5xl mb-3"></i>
+                    <p>Select a conversation to read and draft a reply.</p>
+                </div>
+            </div>
+
+            <div id="reader" class="hidden flex-1 flex flex-col overflow-hidden">
+                <div class="p-4 border-b border-zinc-800 flex-shrink-0">
+                    <h2 id="threadSubject" class="display text-lg font-semibold"></h2>
+                    <p id="threadMeta" class="text-sm text-zinc-500 mt-0.5"></p>
+                </div>
+
+                <div id="messages" class="flex-1 overflow-auto p-4 space-y-3"></div>
+
+                <!-- COMPOSER -->
+                <div class="border-t border-zinc-800 p-4 flex-shrink-0 bg-zinc-950">
+                    <div class="flex items-center gap-2 mb-2">
+                        <button id="generateBtn" onclick="generateReply()"
+                            class="px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-500 font-medium text-sm">
+                            <i class="fas fa-wand-magic-sparkles mr-1"></i> Draft reply in my voice
+                        </button>
+                        <select id="lengthSel" class="bg-zinc-900 border border-zinc-800 rounded-md px-2 py-2 text-sm focus:outline-none">
+                            <option value="brief">Brief</option>
+                            <option value="standard" selected>Standard</option>
+                            <option value="detailed">Detailed</option>
+                        </select>
+                        <input id="instruction" placeholder="Optional: extra instructions (e.g. 'politely decline')"
+                            class="flex-1 bg-zinc-900 border border-zinc-800 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-blue-600">
+                    </div>
+                    <textarea id="replyBox" rows="6" placeholder="Your reply will appear here — edit freely before saving."
+                        class="w-full bg-zinc-900 border border-zinc-800 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-blue-600 resize-none"></textarea>
+                    <div class="flex items-center justify-between mt-2">
+                        <span id="composerStatus" class="text-xs text-zinc-500"></span>
+                        <div class="flex gap-2">
+                            <button onclick="saveDraft()" class="px-4 py-2 rounded-md bg-zinc-800 hover:bg-zinc-700 text-sm">
+                                <i class="fas fa-floppy-disk mr-1"></i> Save to Gmail drafts
+                            </button>
+                            <button onclick="sendReply()" class="px-4 py-2 rounded-md bg-emerald-600 hover:bg-emerald-500 text-sm font-medium">
+                                <i class="fas fa-paper-plane mr-1"></i> Send
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- SETTINGS MODAL -->
+    <div id="settingsModal" class="hidden fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-xl w-full max-w-lg p-6 fade-in">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="display text-lg font-bold">Settings</h2>
+                <button onclick="closeSettings()" class="text-zinc-500 hover:text-zinc-300"><i class="fas fa-xmark"></i></button>
+            </div>
+            <label class="block text-sm font-medium mb-1">Google OAuth Client ID</label>
+            <input id="cfgClientId" placeholder="xxxxx.apps.googleusercontent.com"
+                class="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-2 text-sm mb-1 focus:outline-none focus:border-blue-600">
+            <p class="text-xs text-zinc-500 mb-4">Add <code id="originHint2" class="text-blue-300"></code> as an authorized JavaScript origin for this client.</p>
+
+            <label class="block text-sm font-medium mb-1">Anthropic API Key</label>
+            <input id="cfgApiKey" type="password" placeholder="sk-ant-…"
+                class="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-2 text-sm mb-1 focus:outline-none focus:border-blue-600">
+            <p class="text-xs text-zinc-500 mb-4">Stored only in this browser (localStorage). Used to call Claude directly from your browser.</p>
+
+            <label class="block text-sm font-medium mb-1">Claude model</label>
+            <select id="cfgModel" class="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-2 text-sm mb-4 focus:outline-none">
+                <option value="claude-opus-4-8">Claude Opus 4.8 (recommended)</option>
+                <option value="claude-sonnet-4-6">Claude Sonnet 4.6 (faster, cheaper)</option>
+                <option value="claude-haiku-4-5">Claude Haiku 4.5 (fastest)</option>
+            </select>
+
+            <div class="flex justify-end gap-2">
+                <button onclick="closeSettings()" class="px-4 py-2 rounded-md bg-zinc-800 hover:bg-zinc-700 text-sm">Cancel</button>
+                <button onclick="saveSettings()" class="px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-500 text-sm font-medium">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- VOICE MODAL -->
+    <div id="voiceModal" class="hidden fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-xl w-full max-w-lg p-6 fade-in max-h-[90vh] overflow-auto">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="display text-lg font-bold">Your Voice</h2>
+                <button onclick="closeVoice()" class="text-zinc-500 hover:text-zinc-300"><i class="fas fa-xmark"></i></button>
+            </div>
+            <p class="text-sm text-zinc-400 mb-4">Tune how Claude writes as you. The more you give it, the closer the match.</p>
+
+            <button onclick="learnVoice()" id="learnBtn" class="w-full mb-4 px-4 py-2.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-sm font-medium">
+                <i class="fas fa-graduation-cap mr-1"></i> Learn from my Sent mail
+            </button>
+            <p id="learnStatus" class="text-xs text-zinc-500 -mt-3 mb-4"></p>
+
+            <label class="block text-sm font-medium mb-1">Tone &amp; style notes</label>
+            <textarea id="voiceTone" rows="3" placeholder="e.g. Direct and professional. Warm but concise. Avoid jargon. Use short paragraphs."
+                class="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-2 text-sm mb-4 focus:outline-none focus:border-blue-600 resize-none"></textarea>
+
+            <label class="block text-sm font-medium mb-1">Sign-off</label>
+            <input id="voiceSignoff" placeholder="e.g. Best, Jacob"
+                class="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-2 text-sm mb-4 focus:outline-none focus:border-blue-600">
+
+            <label class="block text-sm font-medium mb-1">Writing samples</label>
+            <textarea id="voiceSamples" rows="8" placeholder="Paste a few emails you've written, separated by a blank line. Auto-filled when you 'Learn from my Sent mail'."
+                class="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-2 text-sm mb-4 focus:outline-none focus:border-blue-600 resize-none"></textarea>
+
+            <div class="flex justify-end gap-2">
+                <button onclick="closeVoice()" class="px-4 py-2 rounded-md bg-zinc-800 hover:bg-zinc-700 text-sm">Cancel</button>
+                <button onclick="saveVoice()" class="px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-500 text-sm font-medium">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST -->
+    <div id="toast" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-lg text-sm font-medium shadow-lg"></div>
+
+<script>
+/* ============================================================
+   Inbox Assistant — client-side Gmail + Claude reply drafter.
+   Runs entirely in the browser. Credentials live in localStorage.
+   ============================================================ */
+
+const GMAIL = 'https://gmail.googleapis.com/gmail/v1/users/me';
+const SCOPES = 'https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.compose';
+
+const state = {
+    token: null,
+    tokenClient: null,
+    me: null,              // { email, name }
+    threads: [],
+    current: null,         // { id, subject, messages: [...] }
+};
+
+const cfg = {
+    get clientId() { return localStorage.getItem('wds_client_id') || ''; },
+    set clientId(v) { localStorage.setItem('wds_client_id', v); },
+    get apiKey() { return localStorage.getItem('wds_api_key') || ''; },
+    set apiKey(v) { localStorage.setItem('wds_api_key', v); },
+    get model() { return localStorage.getItem('wds_model') || 'claude-opus-4-8'; },
+    set model(v) { localStorage.setItem('wds_model', v); },
+};
+
+const voice = {
+    get tone() { return localStorage.getItem('wds_voice_tone') || ''; },
+    set tone(v) { localStorage.setItem('wds_voice_tone', v); },
+    get signoff() { return localStorage.getItem('wds_voice_signoff') || ''; },
+    set signoff(v) { localStorage.setItem('wds_voice_signoff', v); },
+    get samples() { return localStorage.getItem('wds_voice_samples') || ''; },
+    set samples(v) { localStorage.setItem('wds_voice_samples', v); },
+};
+
+/* ---------- UI helpers ---------- */
+function $(id) { return document.getElementById(id); }
+function toast(msg, kind = 'ok') {
+    const t = $('toast');
+    t.textContent = msg;
+    t.className = 'fixed bottom-5 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-lg text-sm font-medium shadow-lg ' +
+        (kind === 'err' ? 'bg-red-600 text-white' : kind === 'warn' ? 'bg-amber-600 text-white' : 'bg-emerald-600 text-white');
+    t.classList.remove('hidden');
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => t.classList.add('hidden'), 3800);
+}
+function esc(s) { return (s || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+
+/* ---------- boot ---------- */
+window.addEventListener('DOMContentLoaded', () => {
+    const origin = window.location.origin;
+    $('originHint').textContent = origin;
+    $('originHint2').textContent = origin;
+    refreshConfigView();
+});
+
+function refreshConfigView() {
+    const ready = cfg.clientId && cfg.apiKey;
+    if (!ready) {
+        $('setupNotice').classList.remove('hidden');
+        $('app').classList.add('hidden');
+    }
+}
+
+/* ---------- settings ---------- */
+function openSettings() {
+    $('cfgClientId').value = cfg.clientId;
+    $('cfgApiKey').value = cfg.apiKey;
+    $('cfgModel').value = cfg.model;
+    $('settingsModal').classList.remove('hidden');
+}
+function closeSettings() { $('settingsModal').classList.add('hidden'); }
+function saveSettings() {
+    cfg.clientId = $('cfgClientId').value.trim();
+    cfg.apiKey = $('cfgApiKey').value.trim();
+    cfg.model = $('cfgModel').value;
+    closeSettings();
+    refreshConfigView();
+    toast('Settings saved');
+    if (cfg.clientId && cfg.apiKey) {
+        $('setupNotice').classList.add('hidden');
+    }
+}
+
+/* ---------- voice ---------- */
+function openVoice() {
+    $('voiceTone').value = voice.tone;
+    $('voiceSignoff').value = voice.signoff;
+    $('voiceSamples').value = voice.samples;
+    $('learnStatus').textContent = '';
+    $('voiceModal').classList.remove('hidden');
+}
+function closeVoice() { $('voiceModal').classList.add('hidden'); }
+function saveVoice() {
+    voice.tone = $('voiceTone').value.trim();
+    voice.signoff = $('voiceSignoff').value.trim();
+    voice.samples = $('voiceSamples').value.trim();
+    closeVoice();
+    toast('Voice profile saved');
+}
+
+/* ---------- auth (Google Identity Services) ---------- */
+function signIn() {
+    if (!cfg.clientId) { toast('Add your Google OAuth Client ID in Settings first', 'warn'); openSettings(); return; }
+    if (!window.google || !google.accounts) { toast('Google sign-in still loading — try again', 'warn'); return; }
+    try {
+        state.tokenClient = google.accounts.oauth2.initTokenClient({
+            client_id: cfg.clientId,
+            scope: SCOPES,
+            callback: async (resp) => {
+                if (resp.error) { toast('Sign-in failed: ' + resp.error, 'err'); return; }
+                state.token = resp.access_token;
+                await onSignedIn();
+            },
+        });
+        state.tokenClient.requestAccessToken({ prompt: state.token ? '' : 'consent' });
+    } catch (e) {
+        toast('Sign-in error: ' + e.message, 'err');
+    }
+}
+
+function signOut() {
+    if (state.token && window.google) google.accounts.oauth2.revoke(state.token, () => {});
+    state.token = null; state.me = null; state.current = null; state.threads = [];
+    $('app').classList.add('hidden');
+    $('signinBtn').classList.remove('hidden');
+    $('signoutBtn').classList.add('hidden');
+    $('voiceBtn').classList.add('hidden');
+    $('userBadge').classList.add('hidden');
+    refreshConfigView();
+    toast('Signed out');
+}
+
+async function onSignedIn() {
+    try {
+        const profile = await gapiGet(`${GMAIL}/profile`);
+        state.me = { email: profile.emailAddress };
+        $('userBadge').textContent = state.me.email;
+        $('userBadge').classList.remove('hidden');
+        $('signinBtn').classList.add('hidden');
+        $('signoutBtn').classList.remove('hidden');
+        $('voiceBtn').classList.remove('hidden');
+        $('setupNotice').classList.add('hidden');
+        $('app').classList.remove('hidden');
+        await loadThreads();
+    } catch (e) {
+        toast('Could not load Gmail profile: ' + e.message, 'err');
+    }
+}
+
+/* ---------- Gmail REST ---------- */
+async function gapiGet(url) {
+    const r = await fetch(url, { headers: { Authorization: 'Bearer ' + state.token } });
+    if (r.status === 401) { state.token = null; throw new Error('Session expired — sign in again'); }
+    if (!r.ok) throw new Error('Gmail API ' + r.status);
+    return r.json();
+}
+async function gapiPost(url, body) {
+    const r = await fetch(url, {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + state.token, 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    });
+    if (!r.ok) throw new Error('Gmail API ' + r.status + ': ' + (await r.text()));
+    return r.json();
+}
+
+function header(headers, name) {
+    const h = (headers || []).find(x => x.name.toLowerCase() === name.toLowerCase());
+    return h ? h.value : '';
+}
+
+// Recursively pull a readable text body out of a message payload.
+function extractBody(payload) {
+    if (!payload) return '';
+    const decode = (data) => {
+        try { return decodeURIComponent(escape(atob((data || '').replace(/-/g, '+').replace(/_/g, '/')))); }
+        catch { try { return atob((data || '').replace(/-/g, '+').replace(/_/g, '/')); } catch { return ''; } }
+    };
+    if (payload.mimeType === 'text/plain' && payload.body && payload.body.data) return decode(payload.body.data);
+    if (payload.parts) {
+        // Prefer plain text part.
+        for (const p of payload.parts) {
+            if (p.mimeType === 'text/plain' && p.body && p.body.data) return decode(p.body.data);
+        }
+        for (const p of payload.parts) {
+            const nested = extractBody(p);
+            if (nested) return nested;
+        }
+    }
+    if (payload.mimeType === 'text/html' && payload.body && payload.body.data) {
+        const tmp = document.createElement('div');
+        tmp.innerHTML = decode(payload.body.data);
+        return (tmp.textContent || '').trim();
+    }
+    return '';
+}
+
+async function loadThreads() {
+    if (!state.token) return;
+    const icon = $('refreshIcon');
+    icon.classList.add('spin');
+    try {
+        const q = $('searchInput').value.trim();
+        const params = new URLSearchParams({ maxResults: '20', labelIds: 'INBOX' });
+        if (q) { params.delete('labelIds'); params.set('q', q); }
+        const list = await gapiGet(`${GMAIL}/threads?${params.toString()}`);
+        const threads = list.threads || [];
+        // Fetch a metadata snippet for each thread (latest message headers).
+        state.threads = await Promise.all(threads.map(async t => {
+            const full = await gapiGet(`${GMAIL}/threads/${t.id}?format=metadata&metadataHeaders=From&metadataHeaders=Subject&metadataHeaders=Date`);
+            const last = full.messages[full.messages.length - 1];
+            return {
+                id: t.id,
+                subject: header(last.payload.headers, 'Subject') || '(no subject)',
+                from: header(last.payload.headers, 'From'),
+                date: header(last.payload.headers, 'Date'),
+                snippet: last.snippet || '',
+                unread: (last.labelIds || []).includes('UNREAD'),
+            };
+        }));
+        renderThreads();
+    } catch (e) {
+        toast(e.message, 'err');
+    } finally {
+        icon.classList.remove('spin');
+    }
+}
+
+function renderThreads() {
+    const el = $('threadList');
+    if (!state.threads.length) { el.innerHTML = '<p class="p-6 text-center text-zinc-600 text-sm">No conversations found.</p>'; return; }
+    el.innerHTML = state.threads.map(t => `
+        <div class="thread-item border-l-2 border-transparent px-4 py-3 cursor-pointer ${state.current && state.current.id === t.id ? 'active' : ''}"
+             onclick="openThread('${t.id}')">
+            <div class="flex justify-between items-baseline gap-2">
+                <span class="text-sm ${t.unread ? 'font-semibold text-white' : 'text-zinc-300'} truncate">${esc(senderName(t.from))}</span>
+                <span class="text-xs text-zinc-600 flex-shrink-0">${esc(shortDate(t.date))}</span>
+            </div>
+            <div class="text-sm ${t.unread ? 'text-zinc-200' : 'text-zinc-400'} truncate">${esc(t.subject)}</div>
+            <div class="text-xs text-zinc-600 truncate mt-0.5">${esc(t.snippet)}</div>
+        </div>`).join('');
+}
+
+function senderName(from) {
+    const m = (from || '').match(/^\s*"?([^"<]*?)"?\s*</);
+    return (m && m[1].trim()) || from || 'Unknown';
+}
+function senderEmail(from) {
+    const m = (from || '').match(/<([^>]+)>/);
+    return m ? m[1] : (from || '').trim();
+}
+function shortDate(d) {
+    const dt = new Date(d); if (isNaN(dt)) return '';
+    const now = new Date();
+    if (dt.toDateString() === now.toDateString()) return dt.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+    return dt.toLocaleDateString([], { month: 'short', day: 'numeric' });
+}
+
+async function openThread(id) {
+    try {
+        const full = await gapiGet(`${GMAIL}/threads/${id}?format=full`);
+        const messages = full.messages.map(m => ({
+            id: m.id,
+            from: header(m.payload.headers, 'From'),
+            to: header(m.payload.headers, 'To'),
+            subject: header(m.payload.headers, 'Subject'),
+            date: header(m.payload.headers, 'Date'),
+            messageId: header(m.payload.headers, 'Message-ID'),
+            references: header(m.payload.headers, 'References'),
+            body: extractBody(m.payload).trim(),
+        }));
+        state.current = { id, subject: messages[0].subject || '(no subject)', messages };
+        renderThread();
+        renderThreads();
+    } catch (e) {
+        toast(e.message, 'err');
+    }
+}
+
+function renderThread() {
+    $('emptyState').classList.add('hidden');
+    $('reader').classList.remove('hidden');
+    $('threadSubject').textContent = state.current.subject;
+    const last = state.current.messages[state.current.messages.length - 1];
+    $('threadMeta').textContent = `${state.current.messages.length} message(s) · latest from ${senderName(last.from)}`;
+    $('messages').innerHTML = state.current.messages.map(m => `
+        <div class="fade-in bg-zinc-900 border border-zinc-800 rounded-lg p-3">
+            <div class="flex justify-between items-baseline gap-2 mb-1.5">
+                <span class="text-sm font-medium text-zinc-200">${esc(senderName(m.from))} <span class="text-zinc-600 font-normal">&lt;${esc(senderEmail(m.from))}&gt;</span></span>
+                <span class="text-xs text-zinc-600">${esc(new Date(m.date).toLocaleString())}</span>
+            </div>
+            <pre class="text-sm text-zinc-400 whitespace-pre-wrap font-sans leading-relaxed">${esc(m.body || '(no readable text)')}</pre>
+        </div>`).join('');
+    $('messages').scrollTop = $('messages').scrollHeight;
+    $('replyBox').value = '';
+    $('composerStatus').textContent = '';
+}
+
+/* ---------- voice learning from Sent mail ---------- */
+async function learnVoice() {
+    if (!state.token) { toast('Connect Gmail first', 'warn'); return; }
+    const btn = $('learnBtn');
+    btn.disabled = true;
+    $('learnStatus').textContent = 'Reading your recent sent mail…';
+    try {
+        const list = await gapiGet(`${GMAIL}/messages?q=in:sent&maxResults=12`);
+        const ids = (list.messages || []).map(m => m.id);
+        const bodies = [];
+        for (const id of ids) {
+            const m = await gapiGet(`${GMAIL}/messages/${id}?format=full`);
+            let body = extractBody(m.payload).trim();
+            body = stripQuoted(body);
+            if (body && body.length > 40 && body.length < 1500) bodies.push(body);
+            if (bodies.length >= 6) break;
+        }
+        if (!bodies.length) { $('learnStatus').textContent = 'No suitable sent emails found.'; btn.disabled = false; return; }
+        $('voiceSamples').value = bodies.join('\n\n---\n\n');
+        $('learnStatus').textContent = `Learned from ${bodies.length} of your sent emails. Review and Save.`;
+        toast('Voice samples loaded from Sent mail');
+    } catch (e) {
+        $('learnStatus').textContent = 'Error: ' + e.message;
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+// Drop quoted reply chains and signatures-after-quote to keep clean samples.
+function stripQuoted(text) {
+    const lines = text.split('\n');
+    const out = [];
+    for (const line of lines) {
+        if (/^On .+ wrote:$/.test(line.trim())) break;
+        if (/^-{2,}\s*Original Message/i.test(line.trim())) break;
+        if (line.trim().startsWith('>')) continue;
+        out.push(line);
+    }
+    return out.join('\n').trim();
+}
+
+/* ---------- Claude reply generation ---------- */
+async function generateReply() {
+    if (!state.current) { toast('Open a conversation first', 'warn'); return; }
+    if (!cfg.apiKey) { toast('Add your Anthropic API key in Settings', 'warn'); openSettings(); return; }
+
+    const btn = $('generateBtn');
+    const orig = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner spin mr-1"></i> Drafting…';
+    $('composerStatus').textContent = 'Asking Claude to write in your voice…';
+
+    try {
+        const thread = state.current.messages.map(m =>
+            `From: ${m.from}\nDate: ${m.date}\n\n${stripQuoted(m.body)}`
+        ).join('\n\n———\n\n');
+
+        const length = $('lengthSel').value;
+        const extra = $('instruction').value.trim();
+
+        const lengthGuide = {
+            brief: 'Keep it short — 1 to 3 sentences.',
+            standard: 'A normal email length — a short paragraph or two.',
+            detailed: 'Thorough where it helps, but never padded.',
+        }[length];
+
+        const systemPrompt =
+`You are drafting an email reply on behalf of the account owner (${state.me.email}). Write the reply EXACTLY as that person would write it — match their voice, not a generic assistant tone.
+
+Voice profile:
+- Tone & style: ${voice.tone || 'professional, clear, and natural'}
+- Sign-off: ${voice.signoff || '(use a simple natural sign-off)'}
+
+${voice.samples ? 'Authentic writing samples from this person (mirror their phrasing, rhythm, greeting style, punctuation, and formality — do not copy content):\n"""\n' + voice.samples.slice(0, 6000) + '\n"""' : 'No writing samples provided; infer a natural, human, professional voice.'}
+
+Rules:
+- Output ONLY the email body text — no subject line, no "Here is your reply", no commentary, no markdown.
+- ${lengthGuide}
+- Address the actual content of the latest message in the thread. Be specific and useful.
+- Sound like a real person wrote it. Avoid corporate filler and AI tells.
+- End with the person's sign-off.`;
+
+        const userPrompt =
+`Here is the email thread (most recent message last). Write my reply to the most recent message.
+
+${thread}
+
+${extra ? 'Additional instruction for this reply: ' + extra : ''}`;
+
+        const reply = await callClaude(systemPrompt, userPrompt);
+        $('replyBox').value = reply.trim();
+        $('composerStatus').textContent = 'Draft ready — edit as needed, then save or send.';
+    } catch (e) {
+        toast('Generation failed: ' + e.message, 'err');
+        $('composerStatus').textContent = '';
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = orig;
+    }
+}
+
+async function callClaude(system, user) {
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+            'content-type': 'application/json',
+            'x-api-key': cfg.apiKey,
+            'anthropic-version': '2023-06-01',
+            'anthropic-dangerous-direct-browser-access': 'true',
+        },
+        body: JSON.stringify({
+            model: cfg.model,
+            max_tokens: 2000,
+            system: system,
+            messages: [{ role: 'user', content: user }],
+        }),
+    });
+    if (!r.ok) {
+        let msg = 'Anthropic API ' + r.status;
+        try { const j = await r.json(); if (j.error && j.error.message) msg = j.error.message; } catch {}
+        throw new Error(msg);
+    }
+    const data = await r.json();
+    if (data.stop_reason === 'refusal') throw new Error('The request was declined by safety filters.');
+    const text = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
+    if (!text) throw new Error('Empty response from Claude');
+    return text;
+}
+
+/* ---------- compose: build + save/send ---------- */
+function buildRawReply(send) {
+    const last = state.current.messages[state.current.messages.length - 1];
+    const toAddr = senderEmail(last.from) || senderEmail(last.to);
+    let subject = state.current.subject || '';
+    if (!/^re:/i.test(subject)) subject = 'Re: ' + subject;
+
+    const body = $('replyBox').value;
+    const refs = [last.references, last.messageId].filter(Boolean).join(' ').trim();
+
+    const headers = [
+        `To: ${toAddr}`,
+        `Subject: ${subject}`,
+        'MIME-Version: 1.0',
+        'Content-Type: text/plain; charset="UTF-8"',
+    ];
+    if (last.messageId) headers.push(`In-Reply-To: ${last.messageId}`);
+    if (refs) headers.push(`References: ${refs}`);
+
+    const mime = headers.join('\r\n') + '\r\n\r\n' + body;
+    // base64url encode (UTF-8 safe)
+    const b64 = btoa(unescape(encodeURIComponent(mime))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    return { raw: b64, threadId: state.current.id, toAddr };
+}
+
+async function saveDraft() {
+    if (!validateCompose()) return;
+    try {
+        const { raw, threadId } = buildRawReply(false);
+        await gapiPost(`${GMAIL}/drafts`, { message: { raw, threadId } });
+        toast('Saved to Gmail drafts');
+        $('composerStatus').textContent = 'Draft saved in Gmail.';
+    } catch (e) {
+        toast('Could not save draft: ' + e.message, 'err');
+    }
+}
+
+async function sendReply() {
+    if (!validateCompose()) return;
+    const { raw, threadId, toAddr } = buildRawReply(true);
+    if (!confirm(`Send this reply to ${toAddr}?`)) return;
+    try {
+        await gapiPost(`${GMAIL}/messages/send`, { raw, threadId });
+        toast('Reply sent');
+        $('composerStatus').textContent = 'Sent.';
+        $('replyBox').value = '';
+    } catch (e) {
+        toast('Could not send: ' + e.message, 'err');
+    }
+}
+
+function validateCompose() {
+    if (!state.current) { toast('Open a conversation first', 'warn'); return false; }
+    if (!$('replyBox').value.trim()) { toast('Reply is empty', 'warn'); return false; }
+    return true;
+}
+</script>
+</body>
+</html>
