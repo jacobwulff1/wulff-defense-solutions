@@ -3,459 +3,766 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wulff Defense Solutions LLC</title>
+    <title>Jake's Steakhouse &amp; Seafood — Tehachapi Fine Dining</title>
+    <meta name="description" content="Jake's Steakhouse & Seafood — Harris Ranch beef, fresh seafood, and a friendly bar in historic downtown Tehachapi, California. Open 7 days a week.">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,600;0,6..96,800;1,6..96,500&family=Inter:wght@300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
-        
         :root {
-            --primary: #0a1428;
+            --bg: #0b0907;
+            --bg-2: #110d0a;
+            --ember: #d4843b;
+            --ember-bright: #f0a04b;
+            --gold: #c9a35b;
+            --cream: #f4ede2;
+            --muted: #9a8d7c;
         }
-        
-        .hero-bg {
-            background-image: linear-gradient(rgba(10, 20, 40, 0.85), rgba(10, 20, 40, 0.85)), url('https://picsum.photos/id/1015/2000/1200');
-            background-size: cover;
-            background-position: center;
+
+        * { -webkit-font-smoothing: antialiased; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            background: var(--bg);
+            color: var(--cream);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
         }
-        
+
+        .display { font-family: 'Bodoni Moda', serif; }
+        .serif { font-family: 'Cormorant Garamond', serif; }
+
+        ::selection { background: var(--ember); color: #0b0907; }
+
+        /* ---------- Custom cursor glow ---------- */
+        .glow-cursor {
+            position: fixed;
+            top: 0; left: 0;
+            width: 480px; height: 480px;
+            margin: -240px 0 0 -240px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(212,132,59,0.10), transparent 65%);
+            pointer-events: none;
+            z-index: 1;
+            transition: opacity .4s ease;
+            mix-blend-mode: screen;
+        }
+
+        /* ---------- Grain overlay ---------- */
+        .grain {
+            position: fixed; inset: 0;
+            pointer-events: none; z-index: 60; opacity: .045;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        }
+
+        /* ---------- Nav ---------- */
+        .nav-shell {
+            transition: background-color .4s ease, backdrop-filter .4s ease, border-color .4s ease, padding .4s ease;
+            border-bottom: 1px solid transparent;
+        }
+        .nav-shell.scrolled {
+            background: rgba(11,9,7,0.72);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid rgba(201,163,91,0.16);
+        }
         .nav-link {
-            transition: all 0.3s ease;
+            position: relative;
+            letter-spacing: .14em;
+            font-size: .72rem;
+            text-transform: uppercase;
+            color: var(--cream);
+            opacity: .8;
+            transition: opacity .3s ease;
         }
-        
-        .nav-link:hover {
-            color: #3b82f6;
-            transform: translateY(-2px);
+        .nav-link::after {
+            content: '';
+            position: absolute; left: 0; bottom: -6px;
+            width: 0; height: 1px; background: var(--ember-bright);
+            transition: width .35s cubic-bezier(.4,0,.2,1);
         }
-        
-        .card-hover {
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        .nav-link:hover { opacity: 1; }
+        .nav-link:hover::after { width: 100%; }
+
+        /* ---------- Buttons ---------- */
+        .btn-ember {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, var(--ember-bright), var(--ember));
+            color: #150f09;
+            letter-spacing: .1em;
+            transition: transform .35s cubic-bezier(.4,0,.2,1), box-shadow .35s ease;
+            box-shadow: 0 10px 30px -10px rgba(240,160,75,.5);
         }
-        
-        .card-hover:hover {
-            transform: translateY(-12px);
-            box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.4);
+        .btn-ember:hover { transform: translateY(-3px); box-shadow: 0 18px 40px -12px rgba(240,160,75,.65); }
+        .btn-outline {
+            border: 1px solid rgba(201,163,91,.45);
+            letter-spacing: .1em;
+            transition: all .35s ease;
         }
-        
-        .section-title {
-            font-family: 'Space Grotesk', sans-serif;
+        .btn-outline:hover { border-color: var(--ember-bright); background: rgba(212,132,59,.08); transform: translateY(-3px); }
+
+        /* ---------- Hero ---------- */
+        .hero-img {
+            position: absolute; inset: 0;
+            background-image: url('https://images.unsplash.com/photo-1600891964092-4316c288032e?auto=format&fit=crop&w=2400&q=80');
+            background-size: cover; background-position: center;
+            transform: scale(1.12);
+            animation: kenburns 22s ease-in-out infinite alternate;
         }
+        @keyframes kenburns {
+            from { transform: scale(1.12) translate(0,0); }
+            to   { transform: scale(1.22) translate(-2%, -2%); }
+        }
+        .hero-veil {
+            position: absolute; inset: 0;
+            background:
+              radial-gradient(120% 80% at 20% 30%, rgba(11,9,7,.35), transparent 60%),
+              linear-gradient(to top, var(--bg) 4%, rgba(11,9,7,.55) 45%, rgba(11,9,7,.55) 100%);
+        }
+
+        .word-rise { display: inline-block; overflow: hidden; vertical-align: bottom; }
+        .word-rise > span {
+            display: inline-block;
+            transform: translateY(110%);
+            animation: rise 1s cubic-bezier(.2,.7,.2,1) forwards;
+        }
+        @keyframes rise { to { transform: translateY(0); } }
+
+        .fade-up { opacity: 0; transform: translateY(16px); animation: fadeUp 1s ease forwards; }
+        @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+        /* ---------- Marquee ---------- */
+        .marquee { display: flex; white-space: nowrap; }
+        .marquee-track {
+            display: flex; align-items: center; gap: 3rem;
+            padding-right: 3rem;
+            animation: scrollx 32s linear infinite;
+        }
+        @keyframes scrollx { to { transform: translateX(-50%); } }
+        .marquee:hover .marquee-track { animation-play-state: paused; }
+
+        /* ---------- Reveal on scroll ---------- */
+        .reveal { opacity: 0; transform: translateY(40px); transition: opacity 1s cubic-bezier(.2,.7,.2,1), transform 1s cubic-bezier(.2,.7,.2,1); }
+        .reveal.in { opacity: 1; transform: none; }
+        .reveal-delay-1 { transition-delay: .12s; }
+        .reveal-delay-2 { transition-delay: .24s; }
+        .reveal-delay-3 { transition-delay: .36s; }
+
+        /* ---------- Menu ---------- */
+        .menu-tab {
+            letter-spacing: .14em; font-size: .72rem; text-transform: uppercase;
+            color: var(--muted); padding-bottom: .6rem; position: relative;
+            transition: color .3s ease;
+        }
+        .menu-tab.active { color: var(--ember-bright); }
+        .menu-tab::after {
+            content:''; position:absolute; left:0; bottom:0; height:1px; width:0;
+            background: var(--ember-bright); transition: width .4s ease;
+        }
+        .menu-tab.active::after { width: 100%; }
+        .menu-panel { display: none; }
+        .menu-panel.active { display: block; animation: fadeUp .6s ease; }
+        .menu-row {
+            display: grid; grid-template-columns: 1fr auto; gap: 1rem;
+            align-items: baseline; padding: 1.15rem 0;
+            border-bottom: 1px dashed rgba(201,163,91,.18);
+        }
+        .dotfill { border-bottom: 1px dotted rgba(201,163,91,.3); flex: 1; margin: 0 .5rem; transform: translateY(-4px); }
+
+        /* ---------- Gallery ---------- */
+        .gallery-item { overflow: hidden; position: relative; }
+        .gallery-item img { transition: transform 1.1s cubic-bezier(.2,.7,.2,1), filter .6s ease; filter: saturate(.9) brightness(.85); }
+        .gallery-item:hover img { transform: scale(1.08); filter: saturate(1.05) brightness(1); }
+
+        .feature-card { transition: transform .5s cubic-bezier(.2,.7,.2,1), border-color .5s ease; }
+        .feature-card:hover { transform: translateY(-8px); border-color: rgba(201,163,91,.45); }
+
+        .divider-orn { display:flex; align-items:center; justify-content:center; gap:1rem; color: var(--gold); }
+        .divider-orn::before, .divider-orn::after { content:''; height:1px; width:70px; background:linear-gradient(to right, transparent, var(--gold)); }
+        .divider-orn::after { background:linear-gradient(to left, transparent, var(--gold)); }
+
+        .eyebrow { letter-spacing: .35em; font-size: .7rem; text-transform: uppercase; color: var(--ember); }
     </style>
 </head>
-<body class="bg-zinc-950 text-zinc-200 font-sans">
-    <!-- NAVBAR -->
-    <nav class="bg-black border-b border-zinc-800 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="flex items-center justify-between h-20">
-                <!-- Logo -->
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold text-2xl border-2 border-white/30">
-                        W
-                    </div>
-                    <div>
-                        <span class="text-2xl font-bold tracking-tighter section-title">WULFF</span>
-                        <span class="text-blue-500 text-sm font-medium tracking-[2px] block -mt-1">DEFENSE</span>
-                    </div>
-                </div>
-                
-                <!-- Desktop Menu -->
-                <div class="hidden md:flex items-center gap-10 text-sm font-medium">
-                    <a href="#home" class="nav-link">HOME</a>
-                    <a href="#about" class="nav-link">ABOUT</a>
-                    <a href="#services" class="nav-link">SERVICES</a>
-                    <a href="#products" class="nav-link">PRODUCTS</a>
-                    <a href="#contact" class="nav-link">CONTACT</a>
-                </div>
-                
-                <div class="flex items-center gap-4">
-                    <button onclick="window.location.href='#contact'" 
-                            class="bg-blue-600 hover:bg-blue-700 px-6 py-2.5 rounded-xl text-sm font-semibold transition-colors">
-                        GET IN TOUCH
-                    </button>
-                    <button onclick="toggleMobileMenu()" class="md:hidden text-2xl">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                </div>
+<body>
+    <div class="grain"></div>
+    <div class="glow-cursor" id="glow"></div>
+
+    <!-- ===== NAV ===== -->
+    <nav id="nav" class="nav-shell fixed top-0 inset-x-0 z-50 py-5">
+        <div class="max-w-7xl mx-auto px-6 flex items-center justify-between">
+            <a href="#home" class="flex items-center gap-3 group">
+                <span class="text-ember text-2xl" style="color:var(--ember-bright)"><i class="fa-solid fa-fire-burner"></i></span>
+                <span class="leading-none">
+                    <span class="display text-xl tracking-wide">JAKE'S</span>
+                    <span class="block text-[.6rem] tracking-[.42em] mt-1" style="color:var(--muted)">STEAKHOUSE &amp; SEAFOOD</span>
+                </span>
+            </a>
+
+            <div class="hidden lg:flex items-center gap-10">
+                <a href="#about" class="nav-link">Our Story</a>
+                <a href="#menu" class="nav-link">Menu</a>
+                <a href="#experience" class="nav-link">Experience</a>
+                <a href="#gallery" class="nav-link">Gallery</a>
+                <a href="#visit" class="nav-link">Visit</a>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <a href="tel:6618226015" class="hidden sm:flex items-center gap-2 text-sm" style="color:var(--cream)">
+                    <i class="fa-solid fa-phone text-xs" style="color:var(--ember-bright)"></i> (661) 822-6015
+                </a>
+                <a href="#visit" class="btn-ember hidden sm:inline-block px-6 py-3 rounded-full text-xs font-semibold uppercase">Reserve</a>
+                <button onclick="toggleMenu()" class="lg:hidden text-2xl"><i class="fa-solid fa-bars"></i></button>
             </div>
         </div>
-        
-        <!-- Mobile Menu -->
-        <div id="mobileMenu" class="hidden md:hidden bg-black border-t border-zinc-800 py-6">
-            <div class="flex flex-col gap-6 px-6 text-lg">
-                <a href="#home" onclick="toggleMobileMenu()" class="nav-link">Home</a>
-                <a href="#about" onclick="toggleMobileMenu()" class="nav-link">About</a>
-                <a href="#services" onclick="toggleMobileMenu()" class="nav-link">Services</a>
-                <a href="#products" onclick="toggleMobileMenu()" class="nav-link">Products</a>
-                <a href="#contact" onclick="toggleMobileMenu()" class="nav-link">Contact</a>
-            </div>
+
+        <div id="mobileMenu" class="hidden lg:hidden mt-4 mx-6 rounded-2xl p-6 flex flex-col gap-5" style="background:var(--bg-2);border:1px solid rgba(201,163,91,.18)">
+            <a href="#about" onclick="toggleMenu()" class="nav-link">Our Story</a>
+            <a href="#menu" onclick="toggleMenu()" class="nav-link">Menu</a>
+            <a href="#experience" onclick="toggleMenu()" class="nav-link">Experience</a>
+            <a href="#gallery" onclick="toggleMenu()" class="nav-link">Gallery</a>
+            <a href="#visit" onclick="toggleMenu()" class="nav-link">Visit</a>
+            <a href="#visit" onclick="toggleMenu()" class="btn-ember text-center px-6 py-3 rounded-full text-xs font-semibold uppercase mt-2">Reserve a Table</a>
         </div>
     </nav>
 
-    <!-- HERO -->
-    <section id="home" class="hero-bg h-screen flex items-center">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="max-w-2xl">
-                <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full text-sm mb-6">
-                    <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    ROCKLIN, CALIFORNIA
-                </div>
-                
-                <h1 class="text-6xl md:text-7xl font-bold leading-tight tracking-tighter section-title mb-6">
-                    DEFENSE SOLUTIONS<br>THAT <span class="text-blue-500">PROTECT</span>
-                </h1>
-                
-                <p class="text-xl text-zinc-400 mb-10">
-                    Wulff Defense Solutions delivers cutting-edge tactical equipment, training programs, 
-                    and strategic consulting for law enforcement, military, and private security.
-                </p>
-                
-                <div class="flex flex-wrap gap-4">
-                    <button onclick="document.getElementById('contact').scrollIntoView({ behavior: 'smooth' })" 
-                            class="bg-white text-black hover:bg-zinc-200 px-8 py-4 rounded-2xl font-semibold text-lg flex items-center gap-3">
-                        <span>REQUEST CONSULTATION</span>
-                        <i class="fas fa-arrow-right"></i>
-                    </button>
-                    
-                    <button onclick="document.getElementById('products').scrollIntoView({ behavior: 'smooth' })" 
-                            class="border border-white/50 hover:border-white px-8 py-4 rounded-2xl font-semibold text-lg">
-                        VIEW CATALOG
-                    </button>
-                </div>
-                
-                <div class="mt-16 flex items-center gap-8 text-sm">
-                    <div class="flex items-center gap-3">
-                        <i class="fas fa-shield-alt text-blue-500 text-2xl"></i>
-                        <div>
-                            <div class="font-semibold">ITAR REGISTERED</div>
-                            <div class="text-zinc-500 text-xs">Compliant & Trusted</div>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <i class="fas fa-users text-blue-500 text-2xl"></i>
-                        <div>
-                            <div class="font-semibold">VETERAN OWNED</div>
-                            <div class="text-zinc-500 text-xs">Proudly American</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="absolute bottom-10 left-1/2 flex flex-col items-center">
-            <div class="text-xs tracking-widest mb-2">SCROLL TO EXPLORE</div>
-            <div class="w-px h-12 bg-gradient-to-b from-transparent via-zinc-400 to-transparent"></div>
-        </div>
-    </section>
+    <!-- ===== HERO ===== -->
+    <section id="home" class="relative min-h-screen flex items-center">
+        <div class="hero-img"></div>
+        <div class="hero-veil"></div>
 
-    <!-- ABOUT -->
-    <section id="about" class="py-24 bg-zinc-900">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="grid md:grid-cols-2 gap-16 items-center">
-                <div>
-                    <div class="uppercase tracking-[3px] text-blue-500 text-sm font-medium mb-3">EST. 2025 • ROCKLIN, CA</div>
-                    <h2 class="section-title text-5xl font-semibold leading-tight mb-8">
-                        Built by operators,<br>for operators.
-                    </h2>
-                    <div class="space-y-6 text-zinc-400">
-                        <p>
-                            Wulff Defense Solutions was founded by Jacob Wulff with a mission to provide 
-                            reliable, mission-ready solutions to those who protect our communities and nation.
-                        </p>
-                        <p>
-                            From advanced tactical gear to comprehensive training programs, we combine 
-                            real-world experience with the latest technology to deliver results that matter.
-                        </p>
-                    </div>
-                    
-                    <div class="mt-12 grid grid-cols-3 gap-8">
-                        <div>
-                            <div class="text-4xl font-bold text-blue-500">50+</div>
-                            <div class="text-sm text-zinc-500 mt-1">ACTIVE CLIENTS</div>
-                        </div>
-                        <div>
-                            <div class="text-4xl font-bold text-blue-500">12</div>
-                            <div class="text-sm text-zinc-500 mt-1">STATES SERVED</div>
-                        </div>
-                        <div>
-                            <div class="text-4xl font-bold text-blue-500">8</div>
-                            <div class="text-sm text-zinc-500 mt-1">YEARS AVG. EXP.</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="relative">
-                    <img src="https://picsum.photos/id/1016/800/600" alt="Tactical Training" 
-                         class="rounded-3xl shadow-2xl">
-                    <div class="absolute -bottom-6 -left-6 bg-zinc-900 border border-zinc-700 rounded-2xl p-6 shadow-xl">
-                        <div class="flex items-center gap-4">
-                            <div class="text-green-500">
-                                <i class="fas fa-check-circle text-3xl"></i>
-                            </div>
-                            <div>
-                                <div class="font-semibold">Certified & Vetted</div>
-                                <div class="text-xs text-zinc-500">Department of Defense<br>Approved Vendor</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <div class="relative z-10 max-w-7xl mx-auto px-6 w-full pt-32 pb-24">
+            <div class="fade-up flex items-center gap-3 mb-8" style="animation-delay:.2s">
+                <span class="h-px w-10" style="background:var(--ember-bright)"></span>
+                <span class="eyebrow">Tehachapi · California · Est. Historic Downtown</span>
             </div>
-        </div>
-    </section>
 
-    <!-- SERVICES -->
-    <section id="services" class="py-24">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="text-center mb-16">
-                <span class="uppercase text-blue-500 tracking-widest text-sm">WHAT WE OFFER</span>
-                <h2 class="section-title text-5xl font-semibold mt-3">Comprehensive Defense Solutions</h2>
-            </div>
-            
-            <div class="grid md:grid-cols-3 gap-8">
-                <!-- Service 1 -->
-                <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 card-hover">
-                    <div class="h-14 w-14 bg-blue-900/50 rounded-2xl flex items-center justify-center text-3xl mb-8">
-                        🎯
-                    </div>
-                    <h3 class="text-2xl font-semibold mb-4">Tactical Training</h3>
-                    <p class="text-zinc-400 mb-6">
-                        Reality-based firearms, CQB, and leadership training programs designed by 
-                        former special operations personnel.
-                    </p>
-                    <ul class="space-y-3 text-sm">
-                        <li class="flex items-center gap-3"><i class="fas fa-check text-green-500"></i> Pistol & Rifle Mastery</li>
-                        <li class="flex items-center gap-3"><i class="fas fa-check text-green-500"></i> Vehicle Tactics</li>
-                        <li class="flex items-center gap-3"><i class="fas fa-check text-green-500"></i> Scenario-Based Drills</li>
-                    </ul>
-                </div>
-                
-                <!-- Service 2 -->
-                <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 card-hover">
-                    <div class="h-14 w-14 bg-blue-900/50 rounded-2xl flex items-center justify-center text-3xl mb-8">
-                        🛡️
-                    </div>
-                    <h3 class="text-2xl font-semibold mb-4">Equipment & Gear</h3>
-                    <p class="text-zinc-400 mb-6">
-                        Curated selection of premium tactical equipment, body armor, optics, and 
-                        mission-specific gear.
-                    </p>
-                    <ul class="space-y-3 text-sm">
-                        <li class="flex items-center gap-3"><i class="fas fa-check text-green-500"></i> Plate Carriers & Armor</li>
-                        <li class="flex items-center gap-3"><i class="fas fa-check text-green-500"></i> Night Vision & Optics</li>
-                        <li class="flex items-center gap-3"><i class="fas fa-check text-green-500"></i> Custom Loadouts</li>
-                    </ul>
-                </div>
-                
-                <!-- Service 3 -->
-                <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 card-hover">
-                    <div class="h-14 w-14 bg-blue-900/50 rounded-2xl flex items-center justify-center text-3xl mb-8">
-                        📡
-                    </div>
-                    <h3 class="text-2xl font-semibold mb-4">Security Consulting</h3>
-                    <p class="text-zinc-400 mb-6">
-                        Risk assessments, executive protection, facility hardening, and emergency 
-                        response planning.
-                    </p>
-                    <ul class="space-y-3 text-sm">
-                        <li class="flex items-center gap-3"><i class="fas fa-check text-green-500"></i> Threat Vulnerability Analysis</li>
-                        <li class="flex items-center gap-3"><i class="fas fa-check text-green-500"></i> Corporate Security</li>
-                        <li class="flex items-center gap-3"><i class="fas fa-check text-green-500"></i> Crisis Management</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </section>
+            <h1 class="display font-extrabold leading-[0.95] text-6xl sm:text-7xl md:text-8xl tracking-tight max-w-4xl">
+                <span class="word-rise"><span style="animation-delay:.15s">Fire,</span></span>
+                <span class="word-rise"><span style="animation-delay:.3s; color:var(--ember-bright)">Steel</span></span>
+                <span class="word-rise"><span style="animation-delay:.45s">&amp;</span></span><br>
+                <span class="word-rise"><span style="animation-delay:.6s">Prime</span></span>
+                <span class="word-rise"><span style="animation-delay:.75s italic" class="italic">Cuts.</span></span>
+            </h1>
 
-    <!-- PRODUCTS TEASER -->
-    <section id="products" class="py-24 bg-zinc-900">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="flex justify-between items-end mb-12">
-                <div>
-                    <span class="uppercase text-sm tracking-widest text-blue-500">SIGNATURE PRODUCTS</span>
-                    <h2 class="section-title text-5xl font-semibold">Gear That Performs</h2>
-                </div>
-                <a href="#" onclick="alert('Full catalog coming soon! Contact us for current inventory.')" 
-                   class="text-blue-500 hover:text-blue-400 flex items-center gap-2 text-sm font-medium">
-                    BROWSE FULL CATALOG <i class="fas fa-arrow-right"></i>
+            <p class="fade-up serif text-2xl md:text-3xl mt-8 max-w-2xl" style="animation-delay:1s; color:var(--cream)">
+                Harris Ranch beef, wild-caught seafood, and a friendly bar — quality plates served in the heart of Old Town Tehachapi.
+            </p>
+
+            <div class="fade-up flex flex-wrap gap-4 mt-10" style="animation-delay:1.15s">
+                <a href="#menu" class="btn-ember px-8 py-4 rounded-full text-sm font-semibold uppercase flex items-center gap-3">
+                    Explore the Menu <i class="fa-solid fa-arrow-right"></i>
                 </a>
+                <a href="#visit" class="btn-outline px-8 py-4 rounded-full text-sm font-semibold uppercase">Reserve a Table</a>
             </div>
-            
-            <div class="grid md:grid-cols-4 gap-6">
-                <div class="bg-black rounded-3xl overflow-hidden card-hover">
-                    <img src="https://picsum.photos/id/201/600/400" class="w-full h-52 object-cover">
-                    <div class="p-6">
-                        <div class="font-mono text-xs text-zinc-500">WDS-001</div>
-                        <h4 class="font-semibold mt-1">Wulff Recon Plate Carrier</h4>
-                        <div class="text-blue-500 text-sm mt-4">$428</div>
-                    </div>
+
+            <div class="fade-up flex flex-wrap items-center gap-x-10 gap-y-4 mt-16 text-sm" style="animation-delay:1.3s; color:var(--muted)">
+                <span class="flex items-center gap-2"><i class="fa-solid fa-cow" style="color:var(--gold)"></i> Harris Ranch Beef</span>
+                <span class="flex items-center gap-2"><i class="fa-solid fa-fish" style="color:var(--gold)"></i> Wild-Caught Seafood</span>
+                <span class="flex items-center gap-2"><i class="fa-solid fa-clock" style="color:var(--gold)"></i> Open 7 Days · 11:30–9</span>
+            </div>
+        </div>
+
+        <div class="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2">
+            <span class="text-[.6rem] tracking-[.3em]" style="color:var(--muted)">SCROLL</span>
+            <span class="w-px h-10" style="background:linear-gradient(to bottom,var(--gold),transparent)"></span>
+        </div>
+    </section>
+
+    <!-- ===== MARQUEE ===== -->
+    <div class="py-5 border-y overflow-hidden" style="border-color:rgba(201,163,91,.16); background:var(--bg-2)">
+        <div class="marquee">
+            <div class="marquee-track display text-2xl" style="color:var(--gold)">
+                <span>Black Diamond Ribeye</span><span style="color:var(--ember)">✦</span>
+                <span>Cold-Water Lobster</span><span style="color:var(--ember)">✦</span>
+                <span>Filet Mignon</span><span style="color:var(--ember)">✦</span>
+                <span>Prime Rib</span><span style="color:var(--ember)">✦</span>
+                <span>Keta Salmon</span><span style="color:var(--ember)">✦</span>
+                <span>Friendly Bar</span><span style="color:var(--ember)">✦</span>
+                <span>Black Diamond Ribeye</span><span style="color:var(--ember)">✦</span>
+                <span>Cold-Water Lobster</span><span style="color:var(--ember)">✦</span>
+                <span>Filet Mignon</span><span style="color:var(--ember)">✦</span>
+                <span>Prime Rib</span><span style="color:var(--ember)">✦</span>
+                <span>Keta Salmon</span><span style="color:var(--ember)">✦</span>
+                <span>Friendly Bar</span><span style="color:var(--ember)">✦</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ABOUT ===== -->
+    <section id="about" class="py-28" style="background:var(--bg)">
+        <div class="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-16 items-center">
+            <div class="reveal relative">
+                <img src="https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=1200&q=80"
+                     alt="Chef searing a steak over open flame" class="rounded-2xl w-full h-[34rem] object-cover">
+                <div class="absolute -bottom-8 -right-4 sm:-right-8 rounded-2xl p-7 backdrop-blur-md"
+                     style="background:rgba(17,13,10,.85); border:1px solid rgba(201,163,91,.3)">
+                    <div class="display text-5xl" style="color:var(--ember-bright)">35+</div>
+                    <div class="text-xs tracking-[.2em] uppercase mt-1" style="color:var(--muted)">Years on the<br>Historic Walk</div>
                 </div>
-                
-                <div class="bg-black rounded-3xl overflow-hidden card-hover">
-                    <img src="https://picsum.photos/id/180/600/400" class="w-full h-52 object-cover">
-                    <div class="p-6">
-                        <div class="font-mono text-xs text-zinc-500">WDS-002</div>
-                        <h4 class="font-semibold mt-1">Wulff 1-6x LPVO Optic</h4>
-                        <div class="text-blue-500 text-sm mt-4">$899</div>
-                    </div>
+            </div>
+
+            <div class="reveal reveal-delay-1">
+                <span class="eyebrow">Our Story</span>
+                <h2 class="display text-5xl md:text-6xl font-semibold leading-tight mt-4 mb-8">
+                    A neighborhood landmark<br>for <span class="italic" style="color:var(--ember-bright)">honest, great food.</span>
+                </h2>
+                <div class="space-y-6 serif text-xl leading-relaxed" style="color:#cbbfae">
+                    <p>
+                        Tucked into the thriving Historic-Walk of downtown Tehachapi, Jake's Steakhouse &amp; Seafood
+                        has long been a gathering place for quality meals and good company — the kind of room where
+                        a celebration dinner and a casual night at the bar feel equally at home.
+                    </p>
+                    <p>
+                        Every prime rib and steak dinner is cut from <span style="color:var(--gold)">Harris Ranch beef</span>,
+                        sourced locally through The Butcher Shop in Old Town. The seafood is wild-caught, the pours are
+                        generous, and the welcome is genuine.
+                    </p>
                 </div>
-                
-                <div class="bg-black rounded-3xl overflow-hidden card-hover">
-                    <img src="https://picsum.photos/id/251/600/400" class="w-full h-52 object-cover">
-                    <div class="p-6">
-                        <div class="font-mono text-xs text-zinc-500">WDS-003</div>
-                        <h4 class="font-semibold mt-1">Wulff Combat Gloves</h4>
-                        <div class="text-blue-500 text-sm mt-4">$89</div>
+
+                <div class="grid grid-cols-3 gap-6 mt-12">
+                    <div>
+                        <div class="display text-3xl" style="color:var(--ember-bright)">7</div>
+                        <div class="text-xs tracking-[.15em] uppercase mt-1" style="color:var(--muted)">Days a Week</div>
                     </div>
-                </div>
-                
-                <div class="bg-black rounded-3xl overflow-hidden card-hover">
-                    <img src="https://picsum.photos/id/866/600/400" class="w-full h-52 object-cover">
-                    <div class="p-6">
-                        <div class="font-mono text-xs text-zinc-500">WDS-004</div>
-                        <h4 class="font-semibold mt-1">Wulff Night Vision Kit</h4>
-                        <div class="text-blue-500 text-sm mt-4">$2,950</div>
+                    <div>
+                        <div class="display text-3xl" style="color:var(--ember-bright)">100%</div>
+                        <div class="text-xs tracking-[.15em] uppercase mt-1" style="color:var(--muted)">Harris Ranch Beef</div>
+                    </div>
+                    <div>
+                        <div class="display text-3xl" style="color:var(--ember-bright)">★★★★★</div>
+                        <div class="text-xs tracking-[.15em] uppercase mt-1" style="color:var(--muted)">Local Favorite</div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- CTA -->
-    <section class="py-20 bg-gradient-to-r from-blue-900 to-black">
-        <div class="max-w-4xl mx-auto text-center px-6">
-            <h2 class="text-4xl font-semibold mb-6">Ready to strengthen your capabilities?</h2>
-            <p class="text-xl text-zinc-300 mb-10">Whether you're a department, agency, or individual operator — we've got you covered.</p>
-            <button onclick="document.getElementById('contact').scrollIntoView({ behavior: 'smooth' })" 
-                    class="bg-white text-black px-12 py-6 rounded-3xl text-xl font-semibold hover:scale-105 transition-transform">
-                START A CONVERSATION
-            </button>
+    <!-- ===== MENU ===== -->
+    <section id="menu" class="py-28" style="background:var(--bg-2)">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="reveal text-center mb-14">
+                <span class="eyebrow">The Table</span>
+                <h2 class="display text-5xl md:text-7xl font-semibold mt-4">Selected Menu</h2>
+                <div class="divider-orn mt-6"><i class="fa-solid fa-utensils"></i></div>
+                <p class="serif text-xl mt-6 max-w-2xl mx-auto" style="color:var(--muted)">
+                    A taste of what's on offer. All steak dinners are served with seasonal vegetable and your choice of
+                    rice pilaf, cauliflower rice, baked potato, mashed potatoes, or fries.
+                </p>
+            </div>
+
+            <!-- Tabs -->
+            <div class="reveal reveal-delay-1 flex flex-wrap justify-center gap-8 sm:gap-12 mb-14">
+                <button class="menu-tab active" data-tab="steaks">Steaks &amp; Prime Rib</button>
+                <button class="menu-tab" data-tab="seafood">Seafood</button>
+                <button class="menu-tab" data-tab="starters">Starters</button>
+                <button class="menu-tab" data-tab="bar">From the Bar</button>
+            </div>
+
+            <div class="reveal reveal-delay-2 grid lg:grid-cols-5 gap-12 items-start">
+                <!-- Panels -->
+                <div class="lg:col-span-3">
+                    <!-- Steaks -->
+                    <div class="menu-panel active" id="steaks">
+                        <div class="menu-row">
+                            <div>
+                                <h4 class="display text-2xl">Black Diamond Ribeye</h4>
+                                <p class="serif text-lg" style="color:var(--muted)">14 oz Harris Ranch, marbled &amp; flame-grilled to order</p>
+                            </div>
+                            <span class="display text-xl" style="color:var(--ember-bright)">$46</span>
+                        </div>
+                        <div class="menu-row">
+                            <div>
+                                <h4 class="display text-2xl">Filet Mignon</h4>
+                                <p class="serif text-lg" style="color:var(--muted)">8 oz center-cut tenderloin, the house signature</p>
+                            </div>
+                            <span class="display text-xl" style="color:var(--ember-bright)">$44</span>
+                        </div>
+                        <div class="menu-row">
+                            <div>
+                                <h4 class="display text-2xl">Slow-Roasted Prime Rib</h4>
+                                <p class="serif text-lg" style="color:var(--muted)">Harris Ranch, au jus &amp; creamed horseradish</p>
+                            </div>
+                            <span class="display text-xl" style="color:var(--ember-bright)">$42</span>
+                        </div>
+                        <div class="menu-row">
+                            <div>
+                                <h4 class="display text-2xl">New York Strip</h4>
+                                <p class="serif text-lg" style="color:var(--muted)">12 oz, bold flavor with a buttered crust</p>
+                            </div>
+                            <span class="display text-xl" style="color:var(--ember-bright)">$40</span>
+                        </div>
+                        <div class="menu-row" style="border-bottom:none">
+                            <div>
+                                <h4 class="display text-2xl">Surf &amp; Turf</h4>
+                                <p class="serif text-lg" style="color:var(--muted)">Filet mignon paired with cold-water lobster tail</p>
+                            </div>
+                            <span class="display text-xl" style="color:var(--ember-bright)">$68</span>
+                        </div>
+                    </div>
+
+                    <!-- Seafood -->
+                    <div class="menu-panel" id="seafood">
+                        <div class="menu-row">
+                            <div>
+                                <h4 class="display text-2xl">Cold-Water Lobster Tail</h4>
+                                <p class="serif text-lg" style="color:var(--muted)">9 oz, seasonal vegetable, choice of starch &amp; drawn butter</p>
+                            </div>
+                            <span class="display text-xl" style="color:var(--ember-bright)">$60</span>
+                        </div>
+                        <div class="menu-row">
+                            <div>
+                                <h4 class="display text-2xl">Wild-Caught Keta Salmon</h4>
+                                <p class="serif text-lg" style="color:var(--muted)">Rice pilaf, seasonal vegetable, honey-balsamic glaze</p>
+                            </div>
+                            <span class="display text-xl" style="color:var(--ember-bright)">$34</span>
+                        </div>
+                        <div class="menu-row">
+                            <div>
+                                <h4 class="display text-2xl">Garlic Butter Shrimp Scampi</h4>
+                                <p class="serif text-lg" style="color:var(--muted)">White wine, garlic, lemon &amp; herbs over pilaf</p>
+                            </div>
+                            <span class="display text-xl" style="color:var(--ember-bright)">$32</span>
+                        </div>
+                        <div class="menu-row" style="border-bottom:none">
+                            <div>
+                                <h4 class="display text-2xl">Pan-Seared Sea Scallops</h4>
+                                <p class="serif text-lg" style="color:var(--muted)">Caramelized crust, brown-butter, seasonal vegetable</p>
+                            </div>
+                            <span class="display text-xl" style="color:var(--ember-bright)">$38</span>
+                        </div>
+                    </div>
+
+                    <!-- Starters -->
+                    <div class="menu-panel" id="starters">
+                        <div class="menu-row">
+                            <div>
+                                <h4 class="display text-2xl">Jumbo Shrimp Cocktail</h4>
+                                <p class="serif text-lg" style="color:var(--muted)">Chilled, house cocktail sauce &amp; lemon</p>
+                            </div>
+                            <span class="display text-xl" style="color:var(--ember-bright)">$16</span>
+                        </div>
+                        <div class="menu-row">
+                            <div>
+                                <h4 class="display text-2xl">French Onion Soup</h4>
+                                <p class="serif text-lg" style="color:var(--muted)">Caramelized onions, gruyère crust</p>
+                            </div>
+                            <span class="display text-xl" style="color:var(--ember-bright)">$11</span>
+                        </div>
+                        <div class="menu-row">
+                            <div>
+                                <h4 class="display text-2xl">Wedge Salad</h4>
+                                <p class="serif text-lg" style="color:var(--muted)">Iceberg, bleu cheese, bacon, vine tomato</p>
+                            </div>
+                            <span class="display text-xl" style="color:var(--ember-bright)">$12</span>
+                        </div>
+                        <div class="menu-row" style="border-bottom:none">
+                            <div>
+                                <h4 class="display text-2xl">Garlic Butter Mushrooms</h4>
+                                <p class="serif text-lg" style="color:var(--muted)">Sautéed in herb butter &amp; white wine</p>
+                            </div>
+                            <span class="display text-xl" style="color:var(--ember-bright)">$13</span>
+                        </div>
+                    </div>
+
+                    <!-- Bar -->
+                    <div class="menu-panel" id="bar">
+                        <div class="menu-row">
+                            <div>
+                                <h4 class="display text-2xl">Old Fashioned</h4>
+                                <p class="serif text-lg" style="color:var(--muted)">Bourbon, bitters, orange &amp; demerara</p>
+                            </div>
+                            <span class="display text-xl" style="color:var(--ember-bright)">$13</span>
+                        </div>
+                        <div class="menu-row">
+                            <div>
+                                <h4 class="display text-2xl">Cabernet Sauvignon</h4>
+                                <p class="serif text-lg" style="color:var(--muted)">California, by the glass</p>
+                            </div>
+                            <span class="display text-xl" style="color:var(--ember-bright)">$12</span>
+                        </div>
+                        <div class="menu-row">
+                            <div>
+                                <h4 class="display text-2xl">Espresso Martini</h4>
+                                <p class="serif text-lg" style="color:var(--muted)">Vodka, coffee liqueur, fresh espresso</p>
+                            </div>
+                            <span class="display text-xl" style="color:var(--ember-bright)">$14</span>
+                        </div>
+                        <div class="menu-row" style="border-bottom:none">
+                            <div>
+                                <h4 class="display text-2xl">Local Draft Beer</h4>
+                                <p class="serif text-lg" style="color:var(--muted)">Rotating selection from the friendly bar</p>
+                            </div>
+                            <span class="display text-xl" style="color:var(--ember-bright)">$7</span>
+                        </div>
+                    </div>
+
+                    <p class="text-xs mt-8" style="color:var(--muted)">
+                        Menu and prices are representative and subject to change. Please call (661) 822-6015 for today's offerings.
+                    </p>
+                </div>
+
+                <!-- Side image -->
+                <div class="lg:col-span-2 hidden lg:block">
+                    <div class="overflow-hidden rounded-2xl">
+                        <img src="https://images.unsplash.com/photo-1432139555190-58524dae6a55?auto=format&fit=crop&w=1000&q=80"
+                             alt="Plated steak dinner" class="w-full h-[30rem] object-cover">
+                    </div>
+                    <div class="mt-4 p-6 rounded-2xl" style="border:1px solid rgba(201,163,91,.2)">
+                        <p class="serif text-lg italic" style="color:#cbbfae">"All Prime Rib &amp; Steak Dinners are prepared with Harris Ranch Beef, provided locally by The Butcher Shop in Old Town Tehachapi."</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
-    <!-- CONTACT -->
-    <section id="contact" class="py-24">
+    <!-- ===== EXPERIENCE ===== -->
+    <section id="experience" class="py-28" style="background:var(--bg)">
         <div class="max-w-7xl mx-auto px-6">
-            <div class="grid md:grid-cols-2 gap-20">
+            <div class="reveal text-center mb-16">
+                <span class="eyebrow">Why Jake's</span>
+                <h2 class="display text-5xl md:text-6xl font-semibold mt-4">More than a meal</h2>
+            </div>
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="reveal feature-card rounded-2xl p-9" style="background:var(--bg-2);border:1px solid rgba(201,163,91,.15)">
+                    <i class="fa-solid fa-fire text-3xl mb-6" style="color:var(--ember-bright)"></i>
+                    <h3 class="display text-2xl mb-3">Grilled Over Flame</h3>
+                    <p class="serif text-lg" style="color:var(--muted)">Hand-cut steaks seared to order with a charred crust and a tender, juicy center every time.</p>
+                </div>
+                <div class="reveal reveal-delay-1 feature-card rounded-2xl p-9" style="background:var(--bg-2);border:1px solid rgba(201,163,91,.15)">
+                    <i class="fa-solid fa-wheat-awn text-3xl mb-6" style="color:var(--ember-bright)"></i>
+                    <h3 class="display text-2xl mb-3">Locally Sourced</h3>
+                    <p class="serif text-lg" style="color:var(--muted)">Harris Ranch beef from The Butcher Shop in Old Town — quality you can taste, sourced close to home.</p>
+                </div>
+                <div class="reveal reveal-delay-2 feature-card rounded-2xl p-9" style="background:var(--bg-2);border:1px solid rgba(201,163,91,.15)">
+                    <i class="fa-solid fa-martini-glass text-3xl mb-6" style="color:var(--ember-bright)"></i>
+                    <h3 class="display text-2xl mb-3">A Friendly Bar</h3>
+                    <p class="serif text-lg" style="color:var(--muted)">Pull up a stool for craft cocktails, cold drafts, and an easy welcome in the heart of downtown.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== GALLERY ===== -->
+    <section id="gallery" class="py-28" style="background:var(--bg-2)">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="reveal flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12">
                 <div>
-                    <h2 class="section-title text-5xl font-semibold mb-8">Get in touch with our team</h2>
-                    <div class="space-y-8">
-                        <div>
-                            <div class="text-sm text-zinc-500">HEADQUARTERS</div>
-                            <div class="mt-2">Rocklin, California, USA</div>
-                        </div>
-                        <div>
-                            <div class="text-sm text-zinc-500">EMAIL</div>
-                            <a href="mailto:info@wulffdefense.com" class="mt-2 hover:text-blue-500">info@wulffdefense.com</a>
-                        </div>
-                        <div>
-                            <div class="text-sm text-zinc-500">PHONE</div>
-                            <a href="tel:9165550192" class="mt-2 hover:text-blue-500">(916) 555-0192</a>
-                        </div>
-                    </div>
-                    
-                    <div class="mt-16 pt-8 border-t border-zinc-800">
-                        <div class="flex gap-6 text-2xl">
-                            <a href="#" class="hover:text-blue-500"><i class="fab fa-x-twitter"></i></a>
-                            <a href="#" class="hover:text-blue-500"><i class="fab fa-linkedin"></i></a>
-                            <a href="#" class="hover:text-blue-500"><i class="fab fa-instagram"></i></a>
-                        </div>
-                    </div>
+                    <span class="eyebrow">The Room</span>
+                    <h2 class="display text-5xl md:text-6xl font-semibold mt-4">A feast for the eyes</h2>
                 </div>
-                
-                <div class="bg-zinc-900 p-10 rounded-3xl">
-                    <form id="contactForm" onsubmit="handleSubmit(event)">
-                        <div class="space-y-6">
-                            <div>
-                                <label class="block text-sm mb-2 text-zinc-400">NAME / ORGANIZATION</label>
-                                <input type="text" id="name" required
-                                       class="w-full bg-black border border-zinc-700 rounded-2xl px-6 py-4 focus:outline-none focus:border-blue-500">
-                            </div>
-                            <div class="grid grid-cols-2 gap-6">
-                                <div>
-                                    <label class="block text-sm mb-2 text-zinc-400">EMAIL</label>
-                                    <input type="email" id="email" required
-                                           class="w-full bg-black border border-zinc-700 rounded-2xl px-6 py-4 focus:outline-none focus:border-blue-500">
-                                </div>
-                                <div>
-                                    <label class="block text-sm mb-2 text-zinc-400">PHONE</label>
-                                    <input type="tel" id="phone"
-                                           class="w-full bg-black border border-zinc-700 rounded-2xl px-6 py-4 focus:outline-none focus:border-blue-500">
-                                </div>
-                            </div>
-                            <div>
-                                <label class="block text-sm mb-2 text-zinc-400">MESSAGE / INQUIRY</label>
-                                <textarea id="message" rows="6" required
-                                    class="w-full bg-black border border-zinc-700 rounded-3xl px-6 py-4 focus:outline-none focus:border-blue-500 resize-none"></textarea>
-                            </div>
-                            
-                            <button type="submit"
-                                    class="w-full bg-blue-600 hover:bg-blue-700 py-5 rounded-2xl font-semibold text-lg transition-colors">
-                                SEND MESSAGE
-                            </button>
-                        </div>
-                    </form>
+                <p class="serif text-xl max-w-md" style="color:var(--muted)">From sizzling cuts to the warm glow of the dining room — a glimpse of an evening at Jake's.</p>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 auto-rows-[14rem]">
+                <div class="reveal gallery-item rounded-xl col-span-2 row-span-2">
+                    <img src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1200&q=80" alt="Grilled ribeye steak" class="w-full h-full object-cover">
+                </div>
+                <div class="reveal reveal-delay-1 gallery-item rounded-xl">
+                    <img src="https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=800&q=80" alt="Lobster tail" class="w-full h-full object-cover">
+                </div>
+                <div class="reveal reveal-delay-2 gallery-item rounded-xl">
+                    <img src="https://images.unsplash.com/photo-1467003909585-2f8a72700288?auto=format&fit=crop&w=800&q=80" alt="Seared salmon" class="w-full h-full object-cover">
+                </div>
+                <div class="reveal gallery-item rounded-xl col-span-2">
+                    <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1200&q=80" alt="Restaurant dining room" class="w-full h-full object-cover">
+                </div>
+                <div class="reveal reveal-delay-1 gallery-item rounded-xl">
+                    <img src="https://images.unsplash.com/photo-1470337458703-46ad1756a187?auto=format&fit=crop&w=800&q=80" alt="Cocktail at the bar" class="w-full h-full object-cover">
+                </div>
+                <div class="reveal reveal-delay-2 gallery-item rounded-xl">
+                    <img src="https://images.unsplash.com/photo-1558030006-450675393462?auto=format&fit=crop&w=800&q=80" alt="Prime rib roast" class="w-full h-full object-cover">
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- FOOTER -->
-    <footer class="bg-black py-16 border-t border-zinc-900">
+    <!-- ===== CTA / RESERVE ===== -->
+    <section class="relative py-32 overflow-hidden">
+        <div class="absolute inset-0">
+            <img src="https://images.unsplash.com/photo-1551218808-94e220e084d2?auto=format&fit=crop&w=2000&q=80" class="w-full h-full object-cover" alt="Steakhouse table set for dinner">
+            <div class="absolute inset-0" style="background:linear-gradient(to right, rgba(11,9,7,.92), rgba(11,9,7,.6))"></div>
+        </div>
+        <div class="relative z-10 max-w-3xl mx-auto px-6 text-center">
+            <span class="eyebrow">Pull Up a Chair</span>
+            <h2 class="display text-5xl md:text-7xl font-semibold mt-4 mb-6 leading-tight">Your table is<br>waiting.</h2>
+            <p class="serif text-2xl mb-10" style="color:#cbbfae">Walk in or call ahead — we'd love to host you for lunch, dinner, or a drink at the bar.</p>
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="tel:6618226015" class="btn-ember px-9 py-4 rounded-full text-sm font-semibold uppercase flex items-center gap-3">
+                    <i class="fa-solid fa-phone"></i> Call (661) 822-6015
+                </a>
+                <a href="#visit" class="btn-outline px-9 py-4 rounded-full text-sm font-semibold uppercase">Find Us</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== VISIT ===== -->
+    <section id="visit" class="py-28" style="background:var(--bg)">
+        <div class="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-16">
+            <div class="reveal">
+                <span class="eyebrow">Visit Us</span>
+                <h2 class="display text-5xl md:text-6xl font-semibold mt-4 mb-10">Find Jake's</h2>
+
+                <div class="space-y-8">
+                    <div class="flex gap-5">
+                        <i class="fa-solid fa-location-dot text-xl mt-1" style="color:var(--ember-bright)"></i>
+                        <div>
+                            <div class="text-xs tracking-[.2em] uppercase" style="color:var(--muted)">Location</div>
+                            <a href="https://maps.google.com/?q=213+S+Curry+St+Tehachapi+CA+93561" target="_blank" rel="noopener" class="serif text-2xl hover:underline">213 S Curry St, Tehachapi, CA 93561</a>
+                            <div class="serif text-lg" style="color:var(--muted)">In the historic downtown Walk</div>
+                        </div>
+                    </div>
+                    <div class="flex gap-5">
+                        <i class="fa-solid fa-phone text-xl mt-1" style="color:var(--ember-bright)"></i>
+                        <div>
+                            <div class="text-xs tracking-[.2em] uppercase" style="color:var(--muted)">Reservations &amp; Inquiries</div>
+                            <a href="tel:6618226015" class="serif text-2xl hover:underline">(661) 822-6015</a>
+                        </div>
+                    </div>
+                    <div class="flex gap-5">
+                        <i class="fa-solid fa-clock text-xl mt-1" style="color:var(--ember-bright)"></i>
+                        <div>
+                            <div class="text-xs tracking-[.2em] uppercase" style="color:var(--muted)">Hours</div>
+                            <div class="serif text-2xl">Open 7 Days a Week</div>
+                            <div class="serif text-lg" style="color:var(--muted)">11:30 AM – 9:00 PM · Lunch &amp; Dinner</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex gap-5 mt-12 text-2xl">
+                    <a href="#" aria-label="Facebook" class="w-12 h-12 rounded-full flex items-center justify-center transition-colors" style="border:1px solid rgba(201,163,91,.3)" onmouseover="this.style.color='var(--ember-bright)'" onmouseout="this.style.color=''"><i class="fa-brands fa-facebook-f text-lg"></i></a>
+                    <a href="#" aria-label="Instagram" class="w-12 h-12 rounded-full flex items-center justify-center transition-colors" style="border:1px solid rgba(201,163,91,.3)" onmouseover="this.style.color='var(--ember-bright)'" onmouseout="this.style.color=''"><i class="fa-brands fa-instagram text-lg"></i></a>
+                    <a href="#" aria-label="Yelp" class="w-12 h-12 rounded-full flex items-center justify-center transition-colors" style="border:1px solid rgba(201,163,91,.3)" onmouseover="this.style.color='var(--ember-bright)'" onmouseout="this.style.color=''"><i class="fa-brands fa-yelp text-lg"></i></a>
+                </div>
+            </div>
+
+            <!-- Reservation form -->
+            <div class="reveal reveal-delay-1 rounded-3xl p-8 md:p-10" style="background:var(--bg-2);border:1px solid rgba(201,163,91,.2)">
+                <h3 class="display text-3xl mb-2">Request a Table</h3>
+                <p class="serif text-lg mb-8" style="color:var(--muted)">Send us a note and we'll confirm by phone.</p>
+                <form id="resForm" onsubmit="handleSubmit(event)" class="space-y-5">
+                    <div>
+                        <label class="block text-xs tracking-[.15em] uppercase mb-2" style="color:var(--muted)">Name</label>
+                        <input id="rname" required class="w-full bg-transparent rounded-xl px-5 py-4 outline-none focus:border-amber-400" style="border:1px solid rgba(201,163,91,.3); color:var(--cream)">
+                    </div>
+                    <div class="grid sm:grid-cols-2 gap-5">
+                        <div>
+                            <label class="block text-xs tracking-[.15em] uppercase mb-2" style="color:var(--muted)">Phone</label>
+                            <input id="rphone" type="tel" class="w-full bg-transparent rounded-xl px-5 py-4 outline-none focus:border-amber-400" style="border:1px solid rgba(201,163,91,.3); color:var(--cream)">
+                        </div>
+                        <div>
+                            <label class="block text-xs tracking-[.15em] uppercase mb-2" style="color:var(--muted)">Party Size</label>
+                            <input id="rparty" type="number" min="1" value="2" class="w-full bg-transparent rounded-xl px-5 py-4 outline-none focus:border-amber-400" style="border:1px solid rgba(201,163,91,.3); color:var(--cream)">
+                        </div>
+                    </div>
+                    <div class="grid sm:grid-cols-2 gap-5">
+                        <div>
+                            <label class="block text-xs tracking-[.15em] uppercase mb-2" style="color:var(--muted)">Date</label>
+                            <input id="rdate" type="date" class="w-full bg-transparent rounded-xl px-5 py-4 outline-none focus:border-amber-400" style="border:1px solid rgba(201,163,91,.3); color:var(--cream)">
+                        </div>
+                        <div>
+                            <label class="block text-xs tracking-[.15em] uppercase mb-2" style="color:var(--muted)">Time</label>
+                            <input id="rtime" type="time" class="w-full bg-transparent rounded-xl px-5 py-4 outline-none focus:border-amber-400" style="border:1px solid rgba(201,163,91,.3); color:var(--cream)">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs tracking-[.15em] uppercase mb-2" style="color:var(--muted)">Notes</label>
+                        <textarea id="rnotes" rows="3" class="w-full bg-transparent rounded-xl px-5 py-4 outline-none focus:border-amber-400 resize-none" style="border:1px solid rgba(201,163,91,.3); color:var(--cream)"></textarea>
+                    </div>
+                    <button type="submit" class="btn-ember w-full py-4 rounded-xl text-sm font-semibold uppercase">Send Request</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="pt-16 pb-10" style="background:var(--bg-2); border-top:1px solid rgba(201,163,91,.16)">
         <div class="max-w-7xl mx-auto px-6">
-            <div class="flex flex-col md:flex-row justify-between items-center gap-8">
-                <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 bg-blue-600 rounded-2xl flex items-center justify-center text-white font-bold">W</div>
-                    <div class="font-bold tracking-tighter">WULFF DEFENSE SOLUTIONS LLC</div>
+            <div class="grid md:grid-cols-3 gap-10 items-start">
+                <div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-2xl" style="color:var(--ember-bright)"><i class="fa-solid fa-fire-burner"></i></span>
+                        <span class="display text-2xl tracking-wide">JAKE'S</span>
+                    </div>
+                    <p class="serif text-lg" style="color:var(--muted)">Steakhouse &amp; Seafood — quality meals and a friendly bar in historic downtown Tehachapi.</p>
                 </div>
-                
-                <div class="text-center text-sm text-zinc-500">
-                    © 2026 Wulff Defense Solutions LLC. All Rights Reserved.<br>
-                    ITAR Registered • Veteran Owned • Made in USA
+                <div class="md:text-center">
+                    <div class="text-xs tracking-[.2em] uppercase mb-3" style="color:var(--muted)">Visit</div>
+                    <p class="serif text-lg">213 S Curry St<br>Tehachapi, CA 93561</p>
+                    <a href="tel:6618226015" class="serif text-lg block mt-2 hover:underline" style="color:var(--ember-bright)">(661) 822-6015</a>
                 </div>
-                
-                <div class="text-xs text-zinc-600">
-                    CONFIDENTIAL • FOR AUTHORIZED PERSONNEL ONLY
+                <div class="md:text-right">
+                    <div class="text-xs tracking-[.2em] uppercase mb-3" style="color:var(--muted)">Hours</div>
+                    <p class="serif text-lg">Open 7 Days<br>11:30 AM – 9:00 PM</p>
                 </div>
+            </div>
+            <div class="mt-12 pt-6 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs" style="border-top:1px solid rgba(201,163,91,.12); color:var(--muted)">
+                <span>© 2026 Jake's Steakhouse &amp; Seafood. All rights reserved.</span>
+                <span>Crafted with fire in Tehachapi, California.</span>
             </div>
         </div>
     </footer>
 
     <script>
-        function toggleMobileMenu() {
-            const menu = document.getElementById('mobileMenu');
-            menu.classList.toggle('hidden');
+        // Mobile menu
+        function toggleMenu() {
+            document.getElementById('mobileMenu').classList.toggle('hidden');
         }
-        
-        function handleSubmit(e) {
-            e.preventDefault();
-            const name = document.getElementById('name').value;
-            alert(`Thank you, ${name.split(' ')[0]}! Your message has been received. A member of the Wulff team will contact you shortly.`);
-            document.getElementById('contactForm').reset();
-        }
-        
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
-                if (this.getAttribute('href') !== '#') {
-                    e.preventDefault();
-                    const target = document.querySelector(this.getAttribute('href'));
-                    if (target) {
-                        target.scrollIntoView({
-                            behavior: 'smooth'
-                        });
-                    }
+
+        // Nav scrolled state
+        const nav = document.getElementById('nav');
+        window.addEventListener('scroll', () => {
+            nav.classList.toggle('scrolled', window.scrollY > 40);
+        });
+
+        // Cursor glow
+        const glow = document.getElementById('glow');
+        let gx = innerWidth/2, gy = innerHeight/2, cx = gx, cy = gy;
+        window.addEventListener('mousemove', e => { gx = e.clientX; gy = e.clientY; });
+        (function loop(){ cx += (gx-cx)*.12; cy += (gy-cy)*.12; glow.style.transform = `translate(${cx}px,${cy}px)`; requestAnimationFrame(loop); })();
+        if (matchMedia('(hover: none)').matches) glow.style.display = 'none';
+
+        // Scroll reveal
+        const io = new IntersectionObserver((entries) => {
+            entries.forEach(en => { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } });
+        }, { threshold: 0.15 });
+        document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+        // Menu tabs
+        document.querySelectorAll('.menu-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.menu-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.menu-panel').forEach(p => p.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+
+        // Smooth anchor + close mobile
+        document.querySelectorAll('a[href^="#"]').forEach(a => {
+            a.addEventListener('click', e => {
+                const id = a.getAttribute('href');
+                if (id.length > 1) {
+                    const t = document.querySelector(id);
+                    if (t) { e.preventDefault(); t.scrollIntoView({ behavior: 'smooth' }); }
                 }
             });
         });
-        
-        document.addEventListener('keydown', function(e) {
-            if (e.key === "Escape") {
-                const menu = document.getElementById('mobileMenu');
-                if (!menu.classList.contains('hidden')) {
-                    menu.classList.add('hidden');
-                }
-            }
+
+        // Reservation form
+        function handleSubmit(e) {
+            e.preventDefault();
+            const name = document.getElementById('rname').value.split(' ')[0] || 'friend';
+            alert(`Thank you, ${name}! Your table request has been received. We'll call to confirm shortly — or reach us anytime at (661) 822-6015.`);
+            document.getElementById('resForm').reset();
+        }
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') document.getElementById('mobileMenu').classList.add('hidden');
         });
-        
-        console.log('%cWulff Defense Solutions Website Loaded Successfully', 'color: #3b82f6; font-family: monospace');
     </script>
 </body>
 </html>
