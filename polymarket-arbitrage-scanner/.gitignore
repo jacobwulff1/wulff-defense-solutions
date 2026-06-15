@@ -1,0 +1,4 @@
+__pycache__/
+*.pyc
+scanner.log
+opportunities.log
